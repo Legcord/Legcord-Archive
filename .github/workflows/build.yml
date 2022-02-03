@@ -9,7 +9,7 @@ jobs:
         with:
           nim-version: '1.6.2' # default is 'stable'
       - name: Install dependencies
-        run: nimble install -y
+        run: sudo apt-get install gtk+-3.0 webkit2gtk-4.0 build-essential && nimble install -y
       - name: Build the project on Linux
         run: nim c src/legcord.nim
       - name: Build the project on Windows
