@@ -12,8 +12,6 @@ jobs:
         run: sudo apt-get install gtk+-3.0 webkit2gtk-4.0 build-essential && nimble install -y
       - name: Build the project on Linux
         run: nim c src/legcord.nim
-      - name: Build the project on Windows
-        run: sudo apt install mingw-w64 && nim c --os:Windows -d:mingw --cpu:amd64 src/legcord.nim
       - id: vars
         shell: bash
         run: |
