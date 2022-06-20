@@ -61,7 +61,7 @@ jobs:
           
           echo "Running nim"
           nim --version
-          nimble install -y
+          nimble install https://github.com/ArmCord/LegUI.git -y
           nim c --cc:vcc src/legcord.nim
       - name: Upload Artifacts
         uses: 'actions/upload-artifact@v2'
