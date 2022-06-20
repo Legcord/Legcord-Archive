@@ -103,7 +103,7 @@ jobs:
                 GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               with:
                 upload_url: ${{ steps.create_release.outputs.upload_url }}
-                asset_path: /home/runner/work/Legcord/Legcord/linux
+                asset_path: /home/runner/work/Legcord/Legcord/linux/legcord
                 asset_name: LegcordLinux
                 asset_content_type: application/octet-stream
             - uses: actions/upload-release-asset@v1
@@ -111,7 +111,7 @@ jobs:
                 GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               with:
                 upload_url: ${{ steps.create_release.outputs.upload_url }}
-                asset_path: /home/runner/work/Legcord/Legcord/windows
+                asset_path: /home/runner/work/Legcord/Legcord/windows/legcord.exe
                 asset_name: LegcordWindows.exe
                 asset_content_type: application/octet-stream
             - run: |
