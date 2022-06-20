@@ -61,6 +61,7 @@ jobs:
           
           echo "Running nim"
           nim --version
+          nimble install -y
           nim c --cc:vcc src/legcord.nim
       - name: Upload Artifacts
         uses: 'actions/upload-artifact@v2'
