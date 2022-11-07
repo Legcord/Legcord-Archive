@@ -10,4 +10,4 @@ bin           = @["legcord"]
 
 # Dependencies
 
-requires "nim >= 1.6.2", "puppy >= 1.6.0", "tinydialogs >= 1.0.0"
+requires "nim >= 1.6.4", "puppy >= 1.6.0", "tinydialogs >= 1.0.0"
