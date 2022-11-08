@@ -12,9 +12,9 @@ jobs:
       - name: Install dependencies
         run: sudo apt-get install gtk+-3.0 webkit2gtk-4.0 build-essential mingw-w64 && nimble install -y
       - name: Build the project on Linux
-        run: nim c src/legcord.nim
+        run: nim c -d:release src/legcord.nim
       - name: Build the project for Windows
-        run: nim c -d:mingw src/legcord.nim
+        run: nim c -d:mingw -d:release src/legcord.nim
       - id: vars
         shell: bash
         run: |

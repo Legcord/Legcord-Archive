@@ -2,3 +2,6 @@ src/legcord
 build.sh
 .vscode
 python.tar.zst
+python
+storage.json
+src/legcord.exe
