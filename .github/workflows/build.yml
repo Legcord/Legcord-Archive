@@ -10,118 +10,47 @@ jobs:
         with:
           nim-version: '1.6.4' # default is 'stable'
       - name: Install dependencies
-        run: sudo apt-get install gtk+-3.0 webkit2gtk-4.0 build-essential && nimble install -y
+        run: sudo apt-get install gtk+-3.0 webkit2gtk-4.0 build-essential mingw-w64 && nimble install -y
       - name: Build the project on Linux
-        run: nim cpp src/legcord.nim
-      - name: Upload Artifacts
-        uses: 'actions/upload-artifact@v2'
-        with:
-          name: "LegcordLinux"
-          path: src/legcord
-      
-  windows:
-    name: "Build Windows"
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os:
-          - windows-latest
-        version:
-          - edge
-    steps:
-      - name: "Checkout"
-        uses: actions/checkout@main
-        with:
-          submodules: recursive
-
-      - uses: msys2/setup-msys2@v2
-        with:
-          update: true
-          install: 'git base-devel'
-      - name: Set up MinGW
-        uses: egor-tensin/setup-mingw@v2
-        with:
-          platform: x64
-      - name: Install dependencies + Build Library
-        if: matrix.version == 'edge'
-        shell: msys2 {0}
+        run: nim c src/legcord.nim
+      - name: Build the project for Windows
+        run: nim c -d:mingw src/legcord.nim
+      - id: vars
+        shell: bash
         run: |
-          pacman --noconfirm -S p7zip
-          mkdir dist
-          mkdir nim
-          curl -L https://nim-lang.org/download/dlls.zip -o dist/dlls.zip
-          curl -L https://nim-lang.org/download/nim-1.6.4_x64.zip -o dist/nim.zip
-          7z x dist/dlls.zip -obin
-          7z x dist/nim.zip -onim
-          
-          echo "${{ github.workspace }}/bin" >> $GITHUB_PATH
-          export PATH="${{ github.workspace }}/bin":$PATH
-          export PATH="${{ github.workspace }}/nim/nim-1.6.4/bin":$PATH
-          echo "${{ github.workspace }}/nim/nim-1.6.4/bin" >> $GITHUB_PATH
-          ls -la nim/nim-1.6.4
-          ls -la nim/nim-1.6.4/bin 
-          echo "$GITHUB_PATH"
-          echo "Running nim"
-          nim --version
-          nimble install tinydialogs -y
-          nimble install puppy -y
-          nim c -d:mingw src/legcord.nim
-      - name: Upload Artifacts
-        uses: 'actions/upload-artifact@v2'
+          echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          name: "LegcordWindows"
-          path: src/legcord.exe
-  release:
-        runs-on: ubuntu-latest
-        needs: [linux, windows]
-
-        steps:
-            - uses: actions/checkout@v2
-            - uses: actions/download-artifact@v2
-              with:
-                  name: LegcordWindows
-                  path: windows
-
-            - uses: actions/download-artifact@v2
-              with:
-                  name: LegcordLinux
-                  path: linux
-            - run: ls && ls linux && ls windows
-            - id: vars
-              shell: bash
-              run: |
-                echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
-            - name: Create Release
-              id: create_release
-              uses: actions/create-release@v1
-              env:
-                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-              with:
-                tag_name: ${{ steps.vars.outputs.sha_short }}
-                release_name: Release ${{ steps.vars.outputs.sha_short }}
-                draft: true
-                prerelease: false
-                body_path: ./.github/release.md
-            - uses: actions/upload-release-asset@v1
-              env:
-                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-              with:
-                upload_url: ${{ steps.create_release.outputs.upload_url }}
-                asset_path: /home/runner/work/Legcord/Legcord/linux/legcord
-                asset_name: LegcordLinux
-                asset_content_type: application/octet-stream
-            - uses: actions/upload-release-asset@v1
-              env:
-                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-              with:
-                upload_url: ${{ steps.create_release.outputs.upload_url }}
-                asset_path: /home/runner/work/Legcord/Legcord/windows/legcord.exe
-                asset_name: LegcordWindows.exe
-                asset_content_type: application/octet-stream
-            - run: |
-                curl --request PATCH \
-                -H "Accept: application/vnd.github.v3+json" \
-                -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-                -H "Content-Type: application/json" \
-                https://api.github.com/repos/${{ github.repository }}/releases/${{steps.create_release.outputs.id}} \
-                -d '{"draft":false}'
+          tag_name: ${{ steps.vars.outputs.sha_short }}
+          release_name: Release ${{ steps.vars.outputs.sha_short }}
+          draft: true
+          prerelease: false
+          body_path: ./.github/release.md
+      - uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: src/legcord
+          asset_name: LegcordLinux
+          asset_content_type: application/octet-stream
+      - uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: src/legcord.exe
+          asset_name: LegcordWindows.exe
+          asset_content_type: application/octet-stream
+      - run: |
+          curl --request PATCH \
+          -H "Accept: application/vnd.github.v3+json" \
+          -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+          -H "Content-Type: application/json" \
+          https://api.github.com/repos/${{ github.repository }}/releases/${{steps.create_release.outputs.id}} \
+          -d '{"draft":false}'
+            
