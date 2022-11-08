@@ -38,7 +38,10 @@ jobs:
         with:
           update: true
           install: 'git base-devel'
-
+      - name: Set up MinGW
+        uses: egor-tensin/setup-mingw@v2
+        with:
+          platform: x64
       - name: Install dependencies + Build Library
         if: matrix.version == 'edge'
         shell: msys2 {0}
@@ -62,7 +65,7 @@ jobs:
           nim --version
           nimble install tinydialogs -y
           nimble install puppy -y
-          nim c src/legcord.nim
+          nim c -d:mingw src/legcord.nim
       - name: Upload Artifacts
         uses: 'actions/upload-artifact@v2'
         with:
